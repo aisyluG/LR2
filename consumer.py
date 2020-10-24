@@ -12,14 +12,13 @@ class Consumer(QObject):
         self.name = name
 
     def run(self, message=None):
-        print('w')
+        # если сообщение не пустое и пытаемся взять один ресурс с семафора
         if message is not None and self.semaphore.tryAcquire(1)==True:
-            print(f'consumer {self.name}', message)
             self.thread().sleep(2)
             self.semaphore2.acquire(1)
-            self.buffer.put(f'Поток {self.name}. ' + message)
+            message = self.buffer.get()
             self.semaphore2.release(1)
-            self.message_getted.emit(self.buffer)
+            self.message_getted.emit(f'Consumer {self.name}' + message)
             print('getted')
         else:
             print('n')

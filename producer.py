@@ -11,7 +11,7 @@ class Producer(QObject):
     def run(self):
         self.messages.put(f'Сообщение {self.message_count}')
         self.semaphore.release(1)
-        print(self.semaphore.available())
+        # уведомление о том, что сообщение отправлено
         self.message_sented.emit(f'Сообщение {self.message_count}')
         self.message_count += 1
         # print('Сообщение', self.message)

@@ -9,19 +9,21 @@ from consumer import Consumer
 class Window(QMainWindow):
     # семафор для работы потока
     sem = QSemaphore()
+
     sem_forBuffer = QSemaphore()
     def __init__(self):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
+        # буфер для отправленных, но еще не обработанных сообщений
+        self.buffer = queue.Queue()
         # потоки для обработки информации
         self.sentThread = QThread()
-        self.sentObj = Producer(self.sem)
+        self.sentObj = Producer(self.sem, self.buffer)
         self.sentObj.moveToThread(self.sentThread)
 
         self.n = 1
-        self.buffer = queue.Queue()
         self.getThreadsPool = [QThread()]
         self.getObjs = [Consumer(self.sem, self.sem_forBuffer, 1, self.buffer)]
         self.getObjs[0].moveToThread(self.getThreadsPool[0])
@@ -60,6 +62,7 @@ class Window(QMainWindow):
                 self.getThreadsPool[i].wait()
             self.getThreadsPool = self.getThreadsPool[:n_new]
             self.getObjs = self.getObjs[:n_new]
+        self.n = n_new
 
 
     def addSendedMessage(self, message):
